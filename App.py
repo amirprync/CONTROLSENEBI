@@ -8,34 +8,28 @@ def compare_dataframes(df1, df2):
     # Verificar que las columnas necesarias existan en los DataFrames
     required_columns_1 = ['Comitente - Número', 'SENEBI - Precio de Referencia', 'Instrumento - Símbolo', 'Comitente - Cantidad']
     required_columns_2 = ['P.Número', 'Precio Productor/Comercial', 'Especie', 'Cantidad']
-    
+
     # Verificación de las columnas y renombrarlas para coincidencia
-    df1.columns = [col if col in required_columns_1 else None for col in df1.columns]
-    df2.columns = [col if col in required_columns_2 else None for col in df2.columns]
-    
-    df1 = df1.dropna(axis=1, how='all')
-    df2 = df2.dropna(axis=1, how='all')
-    
-    df1.rename(columns={
+    df1 = df1.rename(columns={
         'Comitente - Número': 'Numero', 
         'SENEBI - Precio de Referencia': 'Precio_1',
         'Instrumento - Símbolo': 'Simbolo',
         'Comitente - Cantidad': 'Cantidad'
-    }, inplace=True)
-    
-    df2.rename(columns={
+    })
+
+    df2 = df2.rename(columns={
         'P.Número': 'Numero', 
         'Precio Productor/Comercial': 'Precio_2',
         'Especie': 'Simbolo',
         'Cantidad': 'Cantidad'
-    }, inplace=True)
+    })
     
     # Unir los dataframes para comparar en base a las tres columnas clave
     merged_df = pd.merge(df1, df2, on=['Numero', 'Simbolo', 'Cantidad'], how='outer', indicator=True)
-
+    
     # Aplicar formato HTML para resaltar las discrepancias de precio
     merged_df['check_prices'] = merged_df.apply(
-        lambda row: f"<span style='color:red;'>{row['Precio_1']}</span>" if row['_merge'] == 'both' and row['Precio_1'] != row['Precio_2'] else row['Precio_1'],
+        lambda row: f"<span style='color:red;'>{row['Precio_1']}</span>" if row['_merge'] == 'both' and pd.notna(row['Precio_1']) and row['Precio_1'] != row['Precio_2'] else f"{row['Precio_1']}",
         axis=1
     )
 
