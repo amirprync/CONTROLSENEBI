@@ -39,11 +39,11 @@ def compare_dataframes(df1, df2):
 
     return discrepancies[['Numero', 'Simbolo', 'Cantidad', 'Precio_1', 'Precio_2', 'check_prices']]
 
-st.title('Comparador de Excel')
+st.title('Control SENEBI')
 
 # Carga de archivos
-file1 = st.file_uploader("Subir archivo Excel 1", type=['xlsx'])
-file2 = st.file_uploader("Subir archivo Excel 2", type=['xlsx'])
+file1 = st.file_uploader("Subir archivo Excel DE OPERACIONES DE BO", type=['xlsx'])
+file2 = st.file_uploader("Subir archivo Excel DE MINUTAS SENEBI", type=['xlsx'])
 
 if file1 and file2:
     df1 = load_data(file1)
