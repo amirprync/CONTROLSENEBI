@@ -18,31 +18,35 @@ def compare_dataframes(df1, df2):
     # Renombrar las columnas para uniformidad
     df1.rename(columns={
         'Comitente - Número': 'Numero', 
-        'SENEBI - Precio de Referencia': 'Precio',
-        'Instrumento - Símbolo': 'Simbolo',
-        'Comitente - Cantidad': 'Cantidad'
+        'SENEBI - Precio de Referencia': 'Precio_1',
+        'Instrumento - Símbolo': 'Simbolo_1',
+        'Comitente - Cantidad': 'Cantidad_1'
     }, inplace=True)
     
     df2.rename(columns={
         'P.Número': 'Numero', 
-        'Precio Productor/Comercial': 'Precio',
-        'Especie': 'Simbolo',
-        'Cantidad': 'Cantidad'
+        'Precio Productor/Comercial': 'Precio_2',
+        'Especie': 'Simbolo_2',
+        'Cantidad': 'Cantidad_2'
     }, inplace=True)
     
     # Unir los dataframes para comparar
-    merged_df = pd.merge(df1, df2, on=['Numero', 'Simbolo', 'Cantidad'], how='outer', suffixes=('_1', '_2'))
+    merged_df = pd.merge(df1, df2, on='Numero', how='outer', suffixes=('_1', '_2'))
     
     # Detectar discrepancias en precio y asignar color rojo
-    merged_df['check_prices'] = merged_df.apply(
-        lambda row: f"<span style='color:red;'>{row['Precio_1']}</span>" if row['Precio_1'] != row['Precio_2'] else row['Precio_1'],
+    discrepancies = merged_df.loc[
+        (merged_df['Precio_1'] != merged_df['Precio_2']) | 
+        (merged_df['Simbolo_1'] != merged_df['Simbolo_2']) |
+        (merged_df['Cantidad_1'] != merged_df['Cantidad_2'])
+    ]
+
+    # Resaltar en rojo las discrepancias de precio
+    discrepancies['check_prices'] = discrepancies.apply(
+        lambda row: f"<span style='color:red;'>{row['Precio_1']}</span>" if pd.notna(row['Precio_1']) and row['Precio_1'] != row['Precio_2'] else row['Precio_1'],
         axis=1
     )
 
-    # Filtrar las filas con discrepancias
-    discrepancies = merged_df[merged_df['Precio_1'] != merged_df['Precio_2']]
-
-    return discrepancies[['Numero', 'Precio_1', 'Precio_2', 'check_prices', 'Simbolo', 'Cantidad']]
+    return discrepancies[['Numero', 'Precio_1', 'Precio_2', 'check_prices', 'Simbolo_1', 'Simbolo_2', 'Cantidad_1', 'Cantidad_2']]
 
 st.title('Comparador de Excel')
 
