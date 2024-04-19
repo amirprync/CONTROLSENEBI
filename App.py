@@ -29,12 +29,12 @@ def compare_dataframes(df1, df2):
     
     # Aplicar formato HTML para resaltar las discrepancias de precio
     merged_df['check_prices'] = merged_df.apply(
-        lambda row: f"<span style='color:red;'>{row['Precio_1']}</span>" if row['_merge'] == 'both' and pd.notna(row['Precio_1']) and row['Precio_1'] != row['Precio_2'] else f"{row['Precio_1']}",
+        lambda row: f"<span style='color:red;'>{row['Precio_1']}</span>" if row['_merge'] == 'both' and pd.notna(row['Precio_1']) and pd.notna(row['Precio_2']) and row['Precio_1'] != row['Precio_2'] else f"{row['Precio_1']}",
         axis=1
     )
 
     # Filtrar las filas con discrepancias
-    discrepancies = merged_df[merged_df['_merge'] != 'both' | (merged_df['Precio_1'] != merged_df['Precio_2'])]
+    discrepancies = merged_df[(merged_df['_merge'] != 'both') | ((merged_df['Precio_1'] != merged_df['Precio_2']) & pd.notna(merged_df['Precio_1']) & pd.notna(merged_df['Precio_2']))]
     discrepancies = discrepancies.drop(columns=['_merge'])
 
     return discrepancies[['Numero', 'Simbolo', 'Cantidad', 'Precio_1', 'Precio_2', 'check_prices']]
